@@ -4,16 +4,17 @@ module WordleInterviewQ
 
     ALLOWED_GUESSES = File.read(File.expand_path('../../wordle-allowed-guesses.txt', __FILE__)).lines.map(&:strip).map(&:upcase)
 
-    def initialize(game)
+    def initialize(game, strategy_class = WordleInterviewQ::SolverStrategy::Random)
       @remaining_words = Game::WORDS.dup
       @remaining_guesses = ALLOWED_GUESSES | @remaining_words
       @game = game
+      @strategy_class = strategy_class
     end
 
     def make_guess
-      guess = @remaining_guesses.sample
+      guess = @strategy_class.new(self, @remaining_words, @remaining_guesses).choose_guess
       clue = @game.guess(guess)
-      
+
       receive_clue(guess, clue)
 
       [guess, clue]
@@ -56,19 +57,19 @@ module WordleInterviewQ
         word_letters[i] = nil
       end
 
-      # Reject words with 'N' letters
-      clue.chars.each_with_index do |clue_char, i|
-        next unless clue_char == 'N'
-
-        return false if word_letters.include?(guess[i])
-      end
-
       # Reject words without remaining 'Y' letters
       clue.chars.each_with_index do |clue_char, i|
         next unless clue_char == 'Y'
 
         return false unless (clue_index = word_letters.index(guess[i])) && clue_index != i
         word_letters[clue_index] = nil
+      end
+
+      # Reject words with 'N' letters
+      clue.chars.each_with_index do |clue_char, i|
+        next unless clue_char == 'N'
+
+        return false if word_letters.include?(guess[i])
       end
 
       true

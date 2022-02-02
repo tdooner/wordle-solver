@@ -25,6 +25,7 @@ RSpec.describe WordleInterviewQ::Solver do
       expect(solver.send(:matches_clue?, 'PARTY', 'PXXXA', 'GNNNY')).to eq(true)
       expect(solver.send(:matches_clue?, 'PARTY', 'PATXX', 'GGYNN')).to eq(true)
       expect(solver.send(:matches_clue?, 'PARTY', 'XXYXX', 'NNYNN')).to eq(true)
+      expect(solver.send(:matches_clue?, 'HAREM', 'RAZER', 'YGNGN')).to eq(true)
       expect(solver.send(:matches_clue?, 'CATTY', 'XTTXX', 'NYGNN')).to eq(true)
       expect(solver.send(:matches_clue?, 'PARTY', 'PXXTX', 'GNNYN')).to eq(false)
       expect(solver.send(:matches_clue?, 'PARTY', 'PXXXX', 'NNNNN')).to eq(false)

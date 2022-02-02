@@ -9,6 +9,7 @@ module WordleInterviewQ
     # Returns a string like "NNYGG" where N = not in word, Y = yellow (in word,
     # wrong position), G = (right position)
     def guess(guessed_word)
+      raise 'No guess provided' if guessed_word.nil? || guessed_word == ''
       guessed_word = guessed_word.upcase
       return 'GOT IT' if guessed_word == @word
 
