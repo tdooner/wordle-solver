@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+require_relative '../wordle_interview_q.rb'
+
+game = WordleInterviewQ::Game.new
+solver = WordleInterviewQ::Solver.new(game)
+clue = "_____"
+loop do
+  $stdout.write "Current state: #{clue}\n"
+  $stdout.write "      Guess? : "
+  guess = $stdin.gets.strip.upcase
+  if guess == ''
+    guess, clue = solver.make_guess
+    $stdout.write "   Auto-guess: #{guess}\n"
+  else
+    clue = game.guess(guess)
+    solver.receive_clue(guess, clue)
+  end
+
+  break if clue == 'GOT IT'
+end
+
+puts 'You got it!'
