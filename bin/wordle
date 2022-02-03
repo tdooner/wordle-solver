@@ -1,22 +1,76 @@
 #!/usr/bin/env ruby
 require_relative '../wordle_interview_q.rb'
 
-game = WordleInterviewQ::Game.new
-solver = WordleInterviewQ::Solver.new(game)
-clue = "_____"
-loop do
-  $stdout.write "Current state: #{clue}\n"
-  $stdout.write "      Guess? : "
-  guess = $stdin.gets.strip.upcase
-  if guess == ''
-    guess, clue = solver.make_guess
-    $stdout.write "   Auto-guess: #{guess}\n"
-  else
-    clue = game.guess(guess)
-    solver.receive_clue(guess, clue)
+def play
+  game = WordleInterviewQ::Game.new
+  solver = WordleInterviewQ::Solver.new(game)
+  clue = "_____"
+  loop do
+    $stdout.write "Current state: #{clue}\n"
+    $stdout.write "      Guess? : "
+    guess = $stdin.gets.strip.upcase
+    if guess == ''
+      guess, clue = solver.make_guess
+      $stdout.write "   Auto-guess: #{guess}\n"
+    else
+      clue = game.guess(guess)
+      solver.receive_clue(guess, clue)
+    end
+
+    break if clue == 'GOT IT'
   end
 
-  break if clue == 'GOT IT'
+  puts 'You got it!'
 end
 
-puts 'You got it!'
+def solve
+  strategies = [
+    WordleInterviewQ::SolverStrategy::Random
+  ]
+
+  attempts = 300
+
+  strategies.each do |strategy_class|
+    statistics = {}
+    puts "Playing #{attempts} games with #{strategy_class}..."
+
+    attempts.times do
+      guesses = 0
+      game = WordleInterviewQ::Game.new
+      solver = WordleInterviewQ::Solver.new(game, strategy_class)
+
+      loop do
+        guesses += 1
+        guess, clue = solver.make_guess
+        solver.receive_clue(guess, clue)
+        if clue == 'GOT IT'
+          statistics[guesses] ||= 0
+          statistics[guesses] += 1
+          break
+        elsif guesses == 6
+          statistics[:fails] ||= 0
+          statistics[:fails] += 1
+          break
+        end
+      end
+    end
+
+    fails = statistics.delete(:fails)
+    puts "Failure rate: #{(100.0 * fails.to_f / attempts).round}%"
+    (1..6).each do |num|
+      pct = statistics.fetch(num, 0).to_f / attempts
+      puts "#{num}: #{'▆' * (40 * pct).floor}#{' ' * (40 * (1 - pct)).ceil} (#{(100 * pct).floor.to_s.rjust(2)}%)"
+    end
+  end
+end
+
+operation = ARGV.shift&.downcase
+case operation
+when 'play'
+  play
+when 'solve'
+  solve
+else
+  puts "Usage: #{$0} [play|solve]"
+  exit 1
+end
