@@ -8,7 +8,7 @@ module WordleInterviewQ
 
     def filter(guess, clue)
       WordList
-        .new(@list)
+        .new(@list.dup)
         .tap { |list| list.filter!(guess, clue) }
     end
 
