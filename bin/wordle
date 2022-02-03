@@ -3,6 +3,7 @@ require_relative '../wordle_interview_q.rb'
 require 'progressbar'
 
 STRATEGIES = [
+  WordleInterviewQ::SolverStrategy::MaximumFiltering,
   WordleInterviewQ::SolverStrategy::Random,
   WordleInterviewQ::SolverStrategy::MostLikelyCharacters,
   WordleInterviewQ::SolverStrategy::GoForTheGreen,

@@ -9,7 +9,7 @@ module WordleInterviewQ
       OPTIMAL_FIRST_GUESS = 'SOARE' # assumes 2 points for green, 1 point for yellow
 
       def choose_guess
-        return OPTIMAL_FIRST_GUESS if @remaining_guesses.length == Solver::ALLOWED_GUESSES.length
+        return OPTIMAL_FIRST_GUESS if first_guess?
 
         best_guess = nil
         best_guess_score = 0
