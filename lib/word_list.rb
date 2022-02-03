@@ -7,11 +7,13 @@ module WordleInterviewQ
     end
 
     def filter(guess, clue)
-      WordList.new(@list.filter { |word| matches_clue?(word, guess, clue) })
+      WordList
+        .new(@list)
+        .tap { |list| list.filter!(guess, clue) }
     end
 
     def filter!(guess, clue)
-      @list = filter(guess, clue).list
+      @list.select! { |word| matches_clue?(word, guess, clue) }
     end
 
     def length
@@ -30,9 +32,10 @@ module WordleInterviewQ
 
     def matches_clue?(word, guess, clue)
       word_letters = word.chars
+      clue_chars = clue.chars
 
       # Reject words missing 'G' letters
-      clue.chars.each_with_index do |clue_char, i|
+      clue_chars.each_with_index do |clue_char, i|
         next unless clue_char == 'G'
 
         return false unless word[i] == guess[i]
@@ -40,7 +43,7 @@ module WordleInterviewQ
       end
 
       # Reject words without remaining 'Y' letters
-      clue.chars.each_with_index do |clue_char, i|
+      clue_chars.each_with_index do |clue_char, i|
         next unless clue_char == 'Y'
 
         return false unless (clue_index = word_letters.index(guess[i])) && clue_index != i
@@ -48,7 +51,7 @@ module WordleInterviewQ
       end
 
       # Reject words with 'N' letters
-      clue.chars.each_with_index do |clue_char, i|
+      clue_chars.each_with_index do |clue_char, i|
         next unless clue_char == 'N'
 
         return false if word_letters.include?(guess[i])
