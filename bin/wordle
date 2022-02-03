@@ -1,9 +1,28 @@
 #!/usr/bin/env ruby
 require_relative '../wordle_interview_q.rb'
 
+STRATEGIES = [
+  WordleInterviewQ::SolverStrategy::Random,
+  WordleInterviewQ::SolverStrategy::MostLikelyCharacters,
+  WordleInterviewQ::SolverStrategy::GoForTheGreen,
+]
+
+
 def play
+  strategy_class = nil
+
+  loop do
+    puts "Pick an auto-guess strategy:"
+    STRATEGIES.each_with_index do |strategy, i|
+      puts "#{i + 1}: #{strategy}"
+    end
+    strategy_class = STRATEGIES[$stdin.gets.to_i - 1]
+    break if strategy_class
+  end
+
   game = WordleInterviewQ::Game.new
-  solver = WordleInterviewQ::Solver.new(game)
+  puts "THE WORD IS #{game.instance_variable_get(:@word)}"
+  solver = WordleInterviewQ::Solver.new(game, strategy_class)
   clue = "_____"
   loop do
     $stdout.write "Current state: #{clue}\n"
@@ -24,14 +43,9 @@ def play
 end
 
 def solve
-  strategies = [
-    WordleInterviewQ::SolverStrategy::Random,
-    WordleInterviewQ::SolverStrategy::MostLikelyCharacters,
-  ]
-
   attempts = 300
 
-  strategies.each do |strategy_class|
+  STRATEGIES.each do |strategy_class|
     statistics = { fails: 0, strategy_time: 0 }
     puts "Playing #{attempts} games with #{strategy_class}..."
 
