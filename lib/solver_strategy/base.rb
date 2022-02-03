@@ -1,6 +1,7 @@
 module WordleInterviewQ
   module SolverStrategy
     autoload :Random, './lib/solver_strategy/random.rb'
+    autoload :MostLikelyCharacters, './lib/solver_strategy/most_likely_characters.rb'
 
     class Base
       def initialize(solver, remaining_words, remaining_guesses)

@@ -25,13 +25,14 @@ end
 
 def solve
   strategies = [
-    WordleInterviewQ::SolverStrategy::Random
+    WordleInterviewQ::SolverStrategy::Random,
+    WordleInterviewQ::SolverStrategy::MostLikelyCharacters,
   ]
 
   attempts = 300
 
   strategies.each do |strategy_class|
-    statistics = {}
+    statistics = { fails: 0, strategy_time: 0 }
     puts "Playing #{attempts} games with #{strategy_class}..."
 
     attempts.times do
@@ -41,8 +42,10 @@ def solve
 
       loop do
         guesses += 1
+        start_time = Time.now
         guess, clue = solver.make_guess
         solver.receive_clue(guess, clue)
+        statistics[:strategy_time] += Time.now - start_time
         if clue == 'GOT IT'
           statistics[guesses] ||= 0
           statistics[guesses] += 1
@@ -56,7 +59,8 @@ def solve
     end
 
     fails = statistics.delete(:fails)
-    puts "Failure rate: #{(100.0 * fails.to_f / attempts).round}%"
+    strategy_time = statistics.delete(:strategy_time)
+    puts "Failure rate: #{(100.0 * fails.to_f / attempts).round}% / Strategy time: #{(1000 * strategy_time / attempts).round(1)} ms / attempt"
     (1..6).each do |num|
       pct = statistics.fetch(num, 0).to_f / attempts
       puts "#{num}: #{'▆' * (40 * pct).floor}#{' ' * (40 * (1 - pct)).ceil} (#{(100 * pct).floor.to_s.rjust(2)}%)"
