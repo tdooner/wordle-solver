@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require_relative '../wordle_interview_q.rb'
+require 'progressbar'
 
 STRATEGIES = [
   WordleInterviewQ::SolverStrategy::Random,
@@ -48,6 +49,7 @@ def solve
   STRATEGIES.each do |strategy_class|
     statistics = { fails: 0, strategy_time: 0 }
     puts "Playing #{attempts} games with #{strategy_class}..."
+    progressbar = ProgressBar.create(total: attempts, format: '%t: (%c/%C) |%W| %e')
 
     attempts.times do
       guesses = 0
@@ -70,11 +72,14 @@ def solve
           break
         end
       end
+
+      progressbar.increment
     end
 
+    progressbar.finish
     fails = statistics.delete(:fails)
     strategy_time = statistics.delete(:strategy_time)
-    puts "Failure rate: #{(100.0 * fails.to_f / attempts).round}% / Strategy time: #{(1000 * strategy_time / attempts).round(1)} ms / attempt"
+    puts "Failure rate: #{(100.0 * fails.to_f / attempts).round}% / Strategy time: #{(1000 * strategy_time / attempts).round(1)} ms per guess"
     (1..6).each do |num|
       pct = statistics.fetch(num, 0).to_f / attempts
       puts "#{num}: #{'▆' * (40 * pct).floor}#{' ' * (40 * (1 - pct)).ceil} (#{(100 * pct).floor.to_s.rjust(2)}%)"
