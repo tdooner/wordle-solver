@@ -2,11 +2,11 @@ module WordleInterviewQ
   class Solver
     attr_reader :remaining_words, :remaining_guesses
 
-    ALLOWED_GUESSES = File.read(File.expand_path('../../wordle-allowed-guesses.txt', __FILE__)).lines.map(&:strip).map(&:upcase)
+    ALLOWED_GUESSES = File.read(File.expand_path('../../wordle-allowed-guesses.txt', __FILE__)).lines.map(&:strip).map(&:upcase) | Game::WORDS
 
     def initialize(game, strategy_class = WordleInterviewQ::SolverStrategy::Random)
       @remaining_words = WordList.new(Game::WORDS.dup)
-      @remaining_guesses = WordList.new(ALLOWED_GUESSES | @remaining_words.list)
+      @remaining_guesses = WordList.new(ALLOWED_GUESSES.dup)
       @game = game
       @strategy_class = strategy_class
     end

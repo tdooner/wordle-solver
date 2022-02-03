@@ -6,11 +6,15 @@ module WordleInterviewQ
     # Rank each guess according to its score, which is the sum for all remaining
     # words, of green and yellow characters (2 and 1 points respectively).
     class GoForTheGreen < Base
+      OPTIMAL_FIRST_GUESS = 'SOARE' # assumes 2 points for green, 1 point for yellow
+
       def choose_guess
+        return OPTIMAL_FIRST_GUESS if @remaining_guesses.length == Solver::ALLOWED_GUESSES.length
+
         best_guess = nil
         best_guess_score = 0
 
-        @remaining_guesses.list.sample(300).each do |guess|
+        @remaining_guesses.list.each do |guess|
           score = @remaining_words.list.sum do |word|
             next 10 if word == guess
 
