@@ -27,12 +27,14 @@ def play
   solver = WordleInterviewQ::Solver.new(game, strategy_class)
   clue = "_____"
   loop do
-    $stdout.write "Current state: #{clue}\n"
+    $stdout.write "        Clue : #{clue}\n"
+    $stdout.write "               (words remaining: #{solver.remaining_words.length})\n"
     $stdout.write "      Guess? : "
     guess = $stdin.gets.strip.upcase
     if guess == ''
+      $stdout.write "   Calculating best guess...\n"
       guess, clue = solver.make_guess
-      $stdout.write "   Auto-guess: #{guess}\n"
+      $stdout.write "    Guessing : #{guess}\n"
     else
       clue = game.guess(guess)
       solver.receive_clue(guess, clue)
@@ -49,47 +51,77 @@ def precompute
 end
 
 def solve
-  attempts = 300
+  attempts = 75
 
-  STRATEGIES.each do |strategy_class|
-    statistics = { fails: 0, strategy_time: 0 }
-    puts "Playing #{attempts} games with #{strategy_class}..."
-    progressbar = ProgressBar.create(total: attempts, format: '%t: (%c/%C) |%W| %e')
+  File.open("results-#{Process.pid}.txt", 'w') do |f|
+    STRATEGIES.each do |strategy_class|
+      statistics = { fails: 0, strategy_time: 0 }
+      puts "Playing #{attempts} games with #{strategy_class}..."
+      progressbar = ProgressBar.create(total: attempts, format: '%t: (%c/%C) |%W| %e')
 
-    attempts.times do
-      guesses = 0
-      game = WordleInterviewQ::Game.new
-      solver = WordleInterviewQ::Solver.new(game, strategy_class)
+      attempts.times do
+        f.write "#{strategy_class}\t"
+        guesses = 0
+        game = WordleInterviewQ::Game.new
+        solver = WordleInterviewQ::Solver.new(game, strategy_class)
 
-      loop do
-        guesses += 1
-        start_time = Time.now
-        guess, clue = solver.make_guess
-        solver.receive_clue(guess, clue)
-        statistics[:strategy_time] += Time.now - start_time
-        if clue == 'GOT IT'
-          statistics[guesses] ||= 0
-          statistics[guesses] += 1
-          break
-        elsif guesses == 6
-          statistics[:fails] ||= 0
-          statistics[:fails] += 1
-          break
+        loop do
+          guesses += 1
+          start_time = Time.now
+          guess, clue = solver.make_guess
+          f.write "#{guess}-#{clue}\t"
+          solver.receive_clue(guess, clue)
+          statistics[:strategy_time] += Time.now - start_time
+          if clue == 'GOT IT'
+            f.sync = true
+            f.write "SOLVED:#{guesses}\n"
+            statistics[guesses] ||= 0
+            statistics[guesses] += 1
+            break
+          elsif guesses == 6
+            f.sync = true
+            f.write "FAILED:#{game.word}"
+            statistics[:fails] ||= 0
+            statistics[:fails] += 1
+            break
+          end
         end
+
+        f.sync = false
+
+        progressbar.increment
       end
 
-      progressbar.increment
-    end
-
-    progressbar.finish
-    fails = statistics.delete(:fails)
-    strategy_time = statistics.delete(:strategy_time)
-    puts "Failure rate: #{(100.0 * fails.to_f / attempts).round}% / Strategy time: #{(1000 * strategy_time / attempts).round(1)} ms per guess"
-    (1..6).each do |num|
-      pct = statistics.fetch(num, 0).to_f / attempts
-      puts "#{num}: #{'▆' * (40 * pct).floor}#{' ' * (40 * (1 - pct)).ceil} (#{(100 * pct).floor.to_s.rjust(2)}%)"
+      progressbar.finish
+      fails = statistics.delete(:fails)
+      strategy_time = statistics.delete(:strategy_time)
+      puts "Failure rate: #{(100.0 * fails.to_f / attempts).round}% / Strategy time: #{(1000 * strategy_time / attempts).round(1)} ms per guess"
+      (1..6).each do |num|
+        pct = statistics.fetch(num, 0).to_f / attempts
+        puts "#{num}: #{'▆' * (40 * pct).floor}#{' ' * (40 * (1 - pct)).ceil} (#{(100 * pct).floor.to_s.rjust(2)}%)"
+      end
     end
   end
+end
+
+def benchmark
+  require 'benchmark'
+
+  iterations = 100_000
+  total_allocations = nil
+
+  Benchmark.bm(13) do |x|
+    x.report('#matches_clue?') do
+      start_allocations = GC.stat[:total_allocated_objects]
+      iterations.times do
+        list = WordleInterviewQ::WordList.new(WordleInterviewQ::Game::WORDS)
+        list.send(:matches_clue?, 'SAMES', 'ESMXX', 'YYGNN')
+      end
+      total_allocations = GC.stat[:total_allocated_objects] - start_allocations
+    end
+  end
+
+  puts "Total allocations: #{total_allocations} (#{total_allocations / iterations}/iter)"
 end
 
 operation = ARGV.shift&.downcase
@@ -100,6 +132,8 @@ when 'precompute'
   precompute
 when 'solve'
   solve
+when 'benchmark'
+  benchmark
 else
   puts "Usage: #{$0} [play|solve]"
   exit 1
