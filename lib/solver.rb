@@ -1,6 +1,6 @@
 module WordleInterviewQ
   class Solver
-    attr_reader :remaining_words, :remaining_guesses
+    attr_reader :remaining_words, :remaining_guesses, :clues
 
     ALLOWED_GUESSES = File.read(File.expand_path('../../wordle-allowed-guesses.txt', __FILE__)).lines.map(&:strip).map(&:upcase) | Game::WORDS
 
@@ -8,6 +8,7 @@ module WordleInterviewQ
       @remaining_words = WordList.new(Game::WORDS.dup)
       @remaining_guesses = WordList.new(ALLOWED_GUESSES.dup)
       @game = game
+      @clues = []
       @strategy_class = strategy_class
     end
 
@@ -22,6 +23,8 @@ module WordleInterviewQ
 
     def receive_clue(guess, clue)
       return if clue == 'GOT IT'
+
+      clues << clue
 
       @remaining_words.filter!(guess, clue)
       @remaining_guesses.filter!(guess, clue)

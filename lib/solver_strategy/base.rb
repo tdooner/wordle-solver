@@ -17,7 +17,15 @@ module WordleInterviewQ
       end
 
       def first_guess?
-        @remaining_guesses.length == Solver::ALLOWED_GUESSES.length
+        @solver.clues.empty?
+      end
+
+      def second_guess?
+        @solver.clues.length == 1
+      end
+
+      def debug(&block)
+        block.call if ENV['DEBUG']
       end
     end
   end
