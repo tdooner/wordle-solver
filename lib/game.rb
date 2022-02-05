@@ -1,5 +1,7 @@
 module WordleInterviewQ
   class Game
+    attr_reader :word
+
     WORDS = File.read(File.expand_path('../../words.txt', __FILE__)).lines.map(&:strip).map(&:upcase)
 
     def initialize(word: WORDS.sample.upcase)

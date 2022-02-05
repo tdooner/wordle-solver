@@ -44,6 +44,10 @@ def play
   puts 'You got it!'
 end
 
+def precompute
+  WordleInterviewQ::SolverStrategy::MaximumFiltering.precompute
+end
+
 def solve
   attempts = 300
 
@@ -92,6 +96,8 @@ operation = ARGV.shift&.downcase
 case operation
 when 'play'
   play
+when 'precompute'
+  precompute
 when 'solve'
   solve
 else
