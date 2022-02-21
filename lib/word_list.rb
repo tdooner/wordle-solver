@@ -42,11 +42,13 @@ module WordleInterviewQ
         word_letters[i] = nil
       end
 
-      # Reject words without remaining 'Y' letters
+      # Reject words without remaining 'Y' letters or with 'Y' letters that
+      # would have been green.
       clue_chars.each_with_index do |clue_char, i|
         next unless clue_char == 'Y'
 
         return false unless (clue_index = word_letters.index(guess[i])) && clue_index != i
+        return false if word[i] == guess[i]
         word_letters[clue_index] = nil
       end
 
