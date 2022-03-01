@@ -70,7 +70,6 @@ def solve
           start_time = Time.now
           guess, clue = solver.make_guess
           f.write "#{guess}-#{clue}\t"
-          solver.receive_clue(guess, clue)
           statistics[:strategy_time] += Time.now - start_time
           if clue == 'GOT IT'
             f.sync = true
@@ -80,7 +79,7 @@ def solve
             break
           elsif guesses == 6
             f.sync = true
-            f.write "FAILED:#{game.word}"
+            f.write "FAILED:#{game.word}\n"
             statistics[:fails] ||= 0
             statistics[:fails] += 1
             break
@@ -124,6 +123,29 @@ def benchmark
   puts "Total allocations: #{total_allocations} (#{total_allocations / iterations}/iter)"
 end
 
+def clues
+  strategy_class = WordleInterviewQ::SolverStrategy::MaximumFiltering
+  game = WordleInterviewQ::InputBasedGame.new
+  solver = WordleInterviewQ::Solver.new(game, strategy_class)
+
+  loop do
+    $stdout.write 'Input existing guess (enter to skip):'
+    guess = $stdin.gets.chomp
+    break if guess.length == 0
+
+    $stdout.write "What was the clue? (G = green; Y = Yellow; N = grey): "
+    clue = $stdin.gets.chomp
+    solver.receive_clue(guess, clue)
+  end
+
+  loop do
+    $stdout.write "               (words remaining: #{solver.remaining_words.length} #{(solver.remaining_words.list.inspect if solver.remaining_words.length < 10)})\n"
+    guess, clue = solver.make_guess
+
+    break if clue == 'GOT IT'
+  end
+end
+
 operation = ARGV.shift&.downcase
 case operation
 when 'play'
@@ -134,6 +156,8 @@ when 'solve'
   solve
 when 'benchmark'
   benchmark
+when 'clues'
+  clues
 else
   puts "Usage: #{$0} [play|solve]"
   exit 1

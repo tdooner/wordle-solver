@@ -3,4 +3,5 @@ module WordleInterviewQ
   autoload :Game, './lib/game.rb'
   autoload :SolverStrategy, './lib/solver_strategy/base.rb'
   autoload :WordList, './lib/word_list.rb'
+  autoload :InputBasedGame, './lib/input_based_game.rb'
 end

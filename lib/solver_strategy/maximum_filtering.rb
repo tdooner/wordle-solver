@@ -42,7 +42,7 @@ module WordleInterviewQ
       end
 
       def choose_guess(disable_optimizations: false)
-        if (guess = precomputed_guess)
+        if !disable_optimizations && (guess = precomputed_guess)
           return guess
         end
         return @remaining_words.list.first if @remaining_words.length == 1
