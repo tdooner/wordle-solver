@@ -34,11 +34,10 @@ module WordleInterviewQ
 
     def matches_clue?(word, guess, clue)
       word_letters = word.chars
-      clue_chars = clue.chars
 
       # Reject words missing 'G' letters
-      clue_chars.each_with_index do |clue_char, i|
-        next unless clue_char == 'G'
+      5.times do |i|
+        next unless clue[i] == 'G'
 
         return false unless word[i] == guess[i]
         word_letters[i] = nil
@@ -46,8 +45,8 @@ module WordleInterviewQ
 
       # Reject words without remaining 'Y' letters or with 'Y' letters that
       # would have been green.
-      clue_chars.each_with_index do |clue_char, i|
-        next unless clue_char == 'Y'
+      5.times do |i|
+        next unless clue[i] == 'Y'
 
         return false unless (clue_index = word_letters.index(guess[i])) && clue_index != i
         return false if word[i] == guess[i]
@@ -55,8 +54,8 @@ module WordleInterviewQ
       end
 
       # Reject words with 'N' letters
-      clue_chars.each_with_index do |clue_char, i|
-        next unless clue_char == 'N'
+      5.times do |i|
+        next unless clue[i] == 'N'
 
         return false if word_letters.include?(guess[i])
       end
