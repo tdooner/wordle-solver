@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module WordleInterviewQ
   class WordList
     attr_reader :list
