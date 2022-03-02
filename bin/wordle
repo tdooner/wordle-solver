@@ -106,21 +106,20 @@ end
 def benchmark
   require 'benchmark'
 
-  iterations = 100_000
+  iterations = 1000
   total_allocations = nil
 
   Benchmark.bm(13) do |x|
-    x.report('#matches_clue?') do
+    x.report('#filter') do
       start_allocations = GC.stat[:total_allocated_objects]
       iterations.times do
         list = WordleInterviewQ::WordList.new(WordleInterviewQ::Game::WORDS)
-        list.send(:matches_clue?, 'SAMES', 'ESMXX', 'YYGNN')
+        list.filter('ESMXX', 'YYGNN')
       end
       total_allocations = GC.stat[:total_allocated_objects] - start_allocations
     end
+    puts "Total allocations: #{total_allocations} (#{total_allocations / iterations}/iter)"
   end
-
-  puts "Total allocations: #{total_allocations} (#{total_allocations / iterations}/iter)"
 end
 
 def clues
