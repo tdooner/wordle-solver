@@ -15,7 +15,10 @@ module WordleInterviewQ
     end
 
     def filter!(guess, clue)
-      @list.select! { |word| matches_clue?(word, guess, clue) }
+      guess_letters = guess.chars
+      clue_letters = clue.chars
+
+      @list.select! { |word| matches_clue?(word, guess_letters, clue_letters) }
     end
 
     def length
