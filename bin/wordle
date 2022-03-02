@@ -124,22 +124,33 @@ def benchmark
 end
 
 def clues
-  strategy_class = WordleInterviewQ::SolverStrategy::MaximumFiltering
-  game = WordleInterviewQ::InputBasedGame.new
-  solver = WordleInterviewQ::Solver.new(game, strategy_class)
+  strategy_class, game, solver = nil, nil, nil
 
-  loop do
-    $stdout.write 'Input existing guess (enter to skip):'
-    guess = $stdin.gets.chomp
-    break if guess.length == 0
+  if ARGV[0] == '--quordle'
+    solver = WordleInterviewQ::SolverQuordle.new(
+      WordleInterviewQ::InputBasedGame.new(label: 'TOP LEFT    '),
+      WordleInterviewQ::InputBasedGame.new(label: 'TOP RIGHT   '),
+      WordleInterviewQ::InputBasedGame.new(label: 'BOTTOM LEFT '),
+      WordleInterviewQ::InputBasedGame.new(label: 'BOTTOM RIGHT')
+    )
+  else
+    strategy_class = WordleInterviewQ::SolverStrategy::MaximumFiltering
+    game = WordleInterviewQ::InputBasedGame.new
+    solver = WordleInterviewQ::Solver.new(game, strategy_class)
 
-    $stdout.write "What was the clue? (G = green; Y = Yellow; N = grey): "
-    clue = $stdin.gets.chomp
-    solver.receive_clue(guess, clue)
+    loop do
+      $stdout.write 'Input existing guess (enter to skip):'
+      guess = $stdin.gets.chomp
+      break if guess.length == 0
+
+      $stdout.write "What was the clue? (G = green; Y = Yellow; N = grey): "
+      clue = $stdin.gets.chomp
+      solver.receive_clue(guess, clue)
+    end
   end
 
   loop do
-    $stdout.write "               (words remaining: #{solver.remaining_words.length} #{(solver.remaining_words.list.inspect if solver.remaining_words.length < 10)})\n"
+    solver.print_words_remaining
     guess, clue = solver.make_guess
 
     break if clue == 'GOT IT'
@@ -160,5 +171,6 @@ when 'clues'
   clues
 else
   puts "Usage: #{$0} [play|solve]"
+  puts "       #{$0} clues [--quordle]"
   exit 1
 end

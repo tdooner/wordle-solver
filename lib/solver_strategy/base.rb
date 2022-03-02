@@ -4,6 +4,7 @@ module WordleInterviewQ
     autoload :MostLikelyCharacters, './lib/solver_strategy/most_likely_characters.rb'
     autoload :GoForTheGreen, './lib/solver_strategy/go_for_the_green.rb'
     autoload :MaximumFiltering, './lib/solver_strategy/maximum_filtering.rb'
+    autoload :MaximumFilteringQuordle, './lib/solver_strategy/maximum_filtering_quordle.rb'
 
     class Base
       def initialize(solver, remaining_words, remaining_guesses)

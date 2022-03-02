@@ -30,6 +30,10 @@ module WordleInterviewQ
       @remaining_guesses.filter!(guess, clue)
     end
 
+    def print_words_remaining
+      puts "               (words remaining: #{solver.remaining_words.length} #{(solver.remaining_words.list.inspect if solver.remaining_words.length < 10)})\n"
+    end
+
     # Returns the guessed word
     def solve
       loop do

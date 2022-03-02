@@ -32,6 +32,8 @@ module WordleInterviewQ
       end
 
       def precomputed_guess
+        return nil unless File.exist?(PRECOMPUTED_FILENAME)
+
         @_precomputed_file ||= JSON.load(File.read(PRECOMPUTED_FILENAME))
 
         if first_guess?
